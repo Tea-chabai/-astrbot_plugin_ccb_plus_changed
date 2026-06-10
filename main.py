@@ -21,7 +21,7 @@ HELP_INFO = """
 /ccbtop 按次数排行
 /ccbmax 按max值排行并输出产生者
 /ccbvol 按注入量排行
-/xnn XNN榜 计算群中最xnn特质的群友
+/xnn   小楠娘榜 计算群中最xnn特质的群友
 /打胶 没有什么特别的，独立出来的打胶功能
 /ccbclear   管理员指令：清除某人的所有 CCB 记录，用法：ccbclear [@目标]
 /ccbnodo  管理员指令：切换目标防被 CCB 状态，用法：ccbnodo [@目标]
@@ -57,7 +57,7 @@ class ccb(Star):
         self.white_list  = config.get("white_list")
         self.selfdo = self.config.get("self_ccb", False)         # 0721 默认为否
         self.crit_prob  =   self.config.get("crit_prob")
-        self.is_log =   self.config.get("is_log")           # 完整日志，默认为false
+        self.is_log =   self.config.get("is_log", False)           # 完整日志，默认为false
 
     #  from issue 6
     async def _is_admin(self, event: AstrMessageEvent) -> bool:
@@ -330,14 +330,14 @@ class ccb(Star):
                             chain = [
                                 Comp.Plain(f"你和{nickname}发生了{duration}min长的ccb行为，向ta注入了 💥 暴击！{V:.2f}ml的生命因子"),
                                 Comp.Image.fromURL(pic),
-                                Comp.Plain(f"这是ta的第{item[a2]}次。")
+                                Comp.Plain(f"这是ta的第{item[a2]}次，ta被累积注入了{item[a3]}ml的生命因子")
                             ]
                         else:
                             # 发送结果
                             chain = [
                                 Comp.Plain(f"你和{nickname}发生了{duration}min长的ccb行为，向ta注入了{V:.2f}ml的生命因子"),
                                 Comp.Image.fromURL(pic),
-                                Comp.Plain(f"这是ta的第{item[a2]}次。")
+                                Comp.Plain(f"这是ta的第{item[a2]}次，ta被累积注入了{item[a3]}ml的生命因子")
                             ]
                         yield event.chain_result(chain)
 
