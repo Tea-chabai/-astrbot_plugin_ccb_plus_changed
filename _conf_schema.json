@@ -1,0 +1,50 @@
+{
+  "yw_window": {
+    "description": "触发赛博阳痿的窗口时间（秒）",
+    "type": "int",
+    "default": 60,
+    "hint": "统计多少秒内的调用次数。"
+  },
+  "yw_threshold": {
+    "description": "窗口时间内最大ccb数",
+    "type": "int",
+    "default": 5,
+    "hint": "同一人多少次请求后会被禁用。"
+  },
+  "yw_ban_duration": {
+    "description": "阳痿时长（秒）",
+    "type": "int",
+    "default": 300,
+    "hint": "被触发限流后禁用多长时间。"
+  },
+  "yw_probability": {
+    "description": "随机阳痿概率",
+    "type": "float",
+    "default": 0.1,
+    "hint": "每次 CCB 完成后，有多大概率阳痿。"
+  },
+  "white_list": {
+    "description": "不能进行ccb的id列表",
+    "type": "list",
+    "default": [],
+    "hint": "当目标在此列表中时，不能对其ccb。"
+  },
+  "self_ccb": {
+    "description": "是否允许0721或者打胶",
+    "type": "bool",
+    "default": false,
+    "hint": "为true时当ccb指令未指定对象时进行0721。关闭时默认打胶"
+  },
+  "crit_prob": {
+    "description": "暴击概率",
+    "type": "float",
+    "default": 0.2,
+    "hint": "ccb时暴击的概率。"
+  },
+  "is_log": {
+    "description": "完整日志记录",
+    "type": "bool",
+    "default": "false",
+    "hint": "是否独立保留每一条ccb记录，包括双方与注入量。"
+  }
+}
