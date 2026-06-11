@@ -219,19 +219,21 @@ class ccb(Star):
 
         group_id = str(event.get_group_id())
         send_id = str(event.get_sender_id())
+        user_name = event.get_sender_name()
         actor_id = send_id
         faint_min = self.faint_random_min
         faint_max = self.faint_random_max
         now = time.time()
         f_now = time.time()
-        if self.faint_duration <= 0:
+        if self.faint_duration >= 0:
             faint_time = self.faint_duration
         else:
-            faint_time = round(random.uniform(faint_min, faint_max), 2)
+            faint_time = round(random.uniform(faint_min, faint_max))
 
         yw_prob_r1 = random.random()
         if yw_prob_r1 < self.yw_prob:
             yw_prob_r = yw_prob_r1
+            faint_prob_r = 1.0
         else:
             faint_prob_r = random.random()
             yw_prob_r = 1.0
@@ -246,6 +248,7 @@ class ccb(Star):
             m, s = divmod(remain, 60)
             yield event.plain_result(f"嘻嘻，你已经一滴不剩了，电子阳痿中，剩余 {m}分{s}秒")
             return
+        
         if f_now < faint_end:
             remain = int(faint_end - f_now)
             m1, s1 = divmod(remain, 60)
@@ -262,7 +265,7 @@ class ccb(Star):
         if len(times) > self.threshold:
             self.ban_list[actor_id] = now + self.ban_duration
             times.clear()
-            yield event.plain_result("你现在已经一滴不剩了，进入贤者模式")
+            yield event.plain_result("你现在已经射不出任何东西了，进入贤者模式")
             return
 
         target_user_id = self._get_target_user_id(event)
@@ -285,7 +288,6 @@ class ccb(Star):
                 V = round(random.uniform(0.01,100), 2)
                 a = time_long(timep)
                 b = volume(V)
-                user_name = event.get_sender_name()
                 yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
                 if yw_prob_r < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
@@ -790,13 +792,15 @@ class ccb(Star):
         yw_prob_r1 = random.random()
         if yw_prob_r1 < self.yw_prob:
             yw_prob_r = yw_prob_r1
+            faint_prob_r = 1.0
         else:
             faint_prob_r = random.random()
+            yw_prob_r = 1.0
 
-        if self.faint_duration <= 0:
+        if self.faint_duration >= 0:
             faint_time = self.faint_duration
         else:
-            faint_time = round(random.uniform(faint_min, faint_max), 2)
+            faint_time = round(random.uniform(faint_min, faint_max))
         
         
         
