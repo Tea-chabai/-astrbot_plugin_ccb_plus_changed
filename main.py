@@ -21,7 +21,7 @@ HELP_INFO = """
 /ccbtop 按次数排行
 /ccbmax 按max值排行并输出产生者
 /ccbvol 按注入量排行
-/xnn   小楠娘榜 计算群中最xnn特质的群友
+/xnn XNN榜 计算群中最xnn特质的群友
 /打胶 没有什么特别的，独立出来的打胶功能
 /ccbclear   管理员指令：清除某人的所有 CCB 记录，用法：ccbclear [@目标]
 /ccbnodo  管理员指令：切换目标防被 CCB 状态，用法：ccbnodo [@目标]
@@ -36,6 +36,9 @@ a2 = "num"      # 北朝次数
 a3 = "vol"      # 被注入量
 a4 = "ccb_by"   # 被谁朝了
 a5 = "max"      # 最大值
+#a6 = "luguan"   #撸管量
+#a7 = "lu_num"   #撸管次数
+
 
 def get_avatar(user_id: str) -> bytes:
     return f"https://q4.qlogo.cn/headimg_dl?dst_uin={user_id}&spec=640"
@@ -50,15 +53,18 @@ class ccb(Star):
         self.config = config
         self.window = config.get("yw_window")                 # 滑动窗口长度（秒）
         self.threshold = config.get("yw_threshold")               # 窗口内最大允许动作次数
-        self.ban_duration = config.get("yw_ban_duration")      # 禁用时长（秒）
+        self.ban_duration = config.get("yw_ban_duration")         # 禁用时长（秒）
+        self.faint_duration = config.get("faint_ban_duration")    #晕倒时长（秒）
         self.action_times = {}
         self.ban_list = {}
+        self.faint_list = {}
         self.yw_prob = config.get("yw_probability")               # 触发概率
         self.white_list  = config.get("white_list")
         self.selfdo = self.config.get("self_ccb", False)         # 0721 默认为否
-        self.crit_prob  =   self.config.get("crit_prob")
+        self.crit_prob  =   self.config.get("crit_prob")         #暴击概率
+        self.faint_prob = self.config.get("faint_prob")          #晕倒概率
         self.is_log =   self.config.get("is_log", False)           # 完整日志，默认为false
-
+        
     #  from issue 6
     async def _is_admin(self, event: AstrMessageEvent) -> bool:
         try:
@@ -113,6 +119,14 @@ class ccb(Star):
             total_vol = float(record.get(a3, 0))
         except Exception:
             total_vol = 0.0
+#        try:
+#            total_num2 = int(record.get(a2, 0))
+#            except Exception:
+#            total_num2 = 0
+#        try:
+#            total_vol2 = float(record.get(a3, 0))
+#        except Exception:
+#            total_vol2 = 0.0
         if total_num <= 0 or not ccb_by:
             record[a5] = 0.0
             for k, v in ccb_by.items():
@@ -205,13 +219,19 @@ class ccb(Star):
         send_id = str(event.get_sender_id())
         actor_id = send_id
         now = time.time()
-
+        f_now = time.time()
         # 检查是否在禁用期内
         ban_end = self.ban_list.get(actor_id, 0)
+        faint_end = self.faint_list.get(actor_id, 0)
         if now < ban_end:
             remain = int(ban_end - now)
             m, s = divmod(remain, 60)
-            yield event.plain_result(f"嘻嘻，你已经一滴不剩了，电子阳痿 {m}分{s}秒")
+            yield event.plain_result(f"嘻嘻，你已经一滴不剩了，电子阳痿中，剩余 {m}分{s}秒")
+            return
+        if now < faint_end:
+            remain = int(faint_end - f_now)
+            m1, s1 = divmod(remain, 60)
+            yield event.plain_result(f"昏厥中，剩余 {m1}分{s1}秒，现在你毫无还手之力")
             return
 
         # 窗口时间统计
@@ -224,7 +244,7 @@ class ccb(Star):
         if len(times) > self.threshold:
             self.ban_list[actor_id] = now + self.ban_duration
             times.clear()
-            yield event.plain_result("冲得出来吗你就冲，再冲就给你折了")
+            yield event.plain_result("你现在已经一滴不剩了，进入贤者模式")
             return
 
         target_user_id = self._get_target_user_id(event)
@@ -234,14 +254,14 @@ class ccb(Star):
                 'get_stranger_info', user_id=target_user_id
             )
             nickname = stranger_info.get("nick", target_user_id)
-            yield event.plain_result(f"{nickname} 的后门被后户之神霸占了，不能ccb（悲")
+            yield event.plain_result(f"{nickname} 的洞洞被掌握CCB的神封印了，不能被艹力（悲")
             return
 
         if target_user_id == actor_id and not self.selfdo:
             if len(times) > self.threshold:
                 self.ban_list[actor_id] = now + self.ban_duration
                 times.clear()
-                yield event.plain_result("冲得出来吗你就冲，再冲就给你折了")
+                yield event.plain_result("你现在已经一滴不剩了，再冲就是雪了（悲")
             else:
                 timep = round(random.uniform(1, 600), 2)
                 V = round(random.uniform(0.01,100), 2)
@@ -252,20 +272,30 @@ class ccb(Star):
                 if random.random() < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
                     yield event.plain_result("💥你鹿炸膛了，萎")
+                if random.random() < self.faint_prob:
+                    self.faint_list[actor_id] = f_now + faint_time
+                    yield event.plain_result(f"{user_name}不小心鹿晕了,接下来ta将毫无还手之力")
+            
             return
 
 
 
 
         # CCB 逻辑
+        if self.faint_duration > 0:
+            faint_time = round(random.uniform(60,900), 2)
+        else:
+            faint_time = self.faint_duration
         duration = round(random.uniform(1, 60), 2)
-        V = round(random.uniform(1, 100), 2)
+        V = round(random.uniform(0.01, 100), 2)
         prob = self.crit_prob
         crit = False
+        faint = False
         is_log = self.is_log
         if random.random() < prob:
             V = round(V * 2, 2)
             crit = True
+
         pic = get_avatar(target_user_id)
 
         all_data = self.read_data()
@@ -328,16 +358,16 @@ class ccb(Star):
 
                         if crit:
                             chain = [
-                                Comp.Plain(f"你和{nickname}发生了{duration}min长的ccb行为，向ta注入了 💥 暴击！{V:.2f}ml的生命因子"),
+                                Comp.Plain(f"你和{nickname}发生了{duration}min长的ccb行为，向ta注入了{V:.2f}ml的生命因子"),
                                 Comp.Image.fromURL(pic),
-                                Comp.Plain(f"这是ta的第{item[a2]}次，ta被累积注入了{item[a3]}ml的生命因子")
+                                Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。")
                             ]
                         else:
                             # 发送结果
                             chain = [
                                 Comp.Plain(f"你和{nickname}发生了{duration}min长的ccb行为，向ta注入了{V:.2f}ml的生命因子"),
                                 Comp.Image.fromURL(pic),
-                                Comp.Plain(f"这是ta的第{item[a2]}次，ta被累积注入了{item[a3]}ml的生命因子")
+                                Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。")
                             ]
                         yield event.chain_result(chain)
 
@@ -355,8 +385,13 @@ class ccb(Star):
                         # 随机养胃
                         if random.random() < self.yw_prob:
                             self.ban_list[actor_id] = now + self.ban_duration
-                            yield event.plain_result("💥你炸膛了，萎")
+                            yield event.plain_result("💥你在这轮后因为用力过猛被迫进入了贤者模式（悲")
 
+                    
+                        #随机昏厥
+                        if random.random() < self.faint_prob:
+                            self.faint_list[send_id] = f_now + faint_time
+                            yield event.plain_result(f"{nickname}被{send_id}艹晕了,接下来ta将毫无还手之力")
                         return
             except Exception as e:
                 logger.error(f"报错: {e}")
@@ -371,7 +406,7 @@ class ccb(Star):
                 chain = [
                     Comp.Plain(f"你和{nickname}发生了{duration}min长的ccb行为，向ta注入了{V:.2f}ml的生命因子"),
                     Comp.Image.fromURL(pic),
-                    Comp.Plain("这是ta的初体验。")
+                    Comp.Plain("这是ta的初体验~，你把人家的处给破了喵～要负责哦喵～")
                 ]
                 yield event.chain_result(chain)
 
@@ -397,7 +432,7 @@ class ccb(Star):
                 # 随机养胃
                 if random.random() < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
-                    yield event.plain_result("💥你炸膛了，萎")
+                    yield event.plain_result("💥你在这轮后因为用力过猛被迫进入了贤者模式（悲")
 
                 return
             except Exception as e:
@@ -513,6 +548,7 @@ class ccb(Star):
             f"• ccb：{cb_total}\n"
             f"• 射出：{total_vol:.2f}ml\n"
             f"• MAX：{max_val:.2f}ml"
+#            f"• 撸出：{total_vol2:.2f}ml\n"
         )
         yield event.plain_result(msg)
 
@@ -695,18 +731,18 @@ class ccb(Star):
         if target_user_id in self.white_list:
             self.white_list = [uid for uid in self.white_list if uid != target_user_id]
             self._save_white_list()
-            yield event.plain_result(f"已解除 {target_user_id} 的防CCB保护")
+            yield event.plain_result(f"已解除 {target_user_id} 的防被艹保护")
         else:
             self.white_list.append(target_user_id)
             self._save_white_list()
-            yield event.plain_result(f"已将 {target_user_id} 加入防CCB保护名单")
+            yield event.plain_result(f"已将 {target_user_id} 加入防被艹保护名单")
     
     @filter.command("打胶")
     async def dajiao(self, event: AstrMessageEvent):
         """
         就是打胶，没有特别的（会炸膛哦，笑
         """
-        
+        faint_time = round(random.uniform(80,900), 2)
         timep = round(random.uniform(1, 666), 2)
         V = round(random.uniform(0.01,114), 2)
         a = time_long(timep)
@@ -715,9 +751,14 @@ class ccb(Star):
         send_id = str(event.get_sender_id())
         actor_id = send_id
         now = time.time()
+        f_now = time.time()
         yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
         if random.random() < self.yw_prob:
             self.ban_list[actor_id] = now + self.ban_duration
-            yield event.plain_result("💥你炸膛了，萎")
+            yield event.plain_result("💥你感觉好像射干净了，进入贤者模式")
+        
+        if random.random() < self.faint_prob:
+            self.faint_list[actor_id] = f_now + faint_time
+            yield event.plain_result(f"{user_name}不小心鹿晕了,接下来ta将毫无还手之力")
 
             return

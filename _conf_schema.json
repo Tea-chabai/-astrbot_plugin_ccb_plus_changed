@@ -14,9 +14,17 @@
   "yw_ban_duration": {
     "description": "阳痿时长（秒）",
     "type": "int",
-    "default": 300,
+    "default": 900,
     "hint": "被触发限流后禁用多长时间。"
   },
+  "faint_ban_duration": {
+    "description": "昏厥时长（秒）",
+    "type": "int",
+    "default": -1,
+    "hint": "被触发昏厥后禁用多长时间。-1为随机时长"
+  },
+
+
   "yw_probability": {
     "description": "随机阳痿概率",
     "type": "float",
@@ -41,6 +49,12 @@
     "default": 0.2,
     "hint": "ccb时暴击的概率。"
   },
+    "faint_prob": {
+    "description": "昏厥概率",
+    "type": "float",
+    "default": 0.2,
+    "hint": "ccb或道观时晕倒概率。"
+    },
   "is_log": {
     "description": "完整日志记录",
     "type": "bool",
