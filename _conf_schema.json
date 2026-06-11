@@ -30,6 +30,18 @@
     "default": 0.1,
     "hint": "每次 CCB 完成后，有多大概率阳痿。"
   },
+  "yw_prob_first": {
+    "description": "首次阳痿概率",
+    "type": "float",
+    "default": 0.3,
+    "hint": "对方第一次被 CCB 时阳痿的概率。"
+  },
+  "faint_prob_first": {
+    "description": "首次晕倒概率",
+    "type": "float",
+    "default": 0.4,
+    "hint": "自己第一次被 CCB 时晕倒的概率。"
+  },
   "crit_prob": {
     "description": "暴击概率",
     "type": "float",

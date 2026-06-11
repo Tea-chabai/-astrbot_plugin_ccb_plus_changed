@@ -61,6 +61,8 @@ class ccb(Star):
         self.ban_list = {}
         self.faint_list = {}
         self.yw_prob = config.get("yw_probability")               # 触发概率
+        self.yw_prob_first = config.get("yw_prob_first")          #因为对方为处女而阳痿的概率
+        self.faint_prob_first = config.get("faint_prob_first")          #首次晕倒的概率
         self.white_list  = config.get("white_list")
         self.selfdo = self.config.get("self_ccb", False)         # 0721 默认为否
         self.crit_prob = self.config.get("crit_prob")         #暴击概率
@@ -211,6 +213,8 @@ class ccb(Star):
 
 
     @filter.command("ccb")
+
+    
     async def ccb(self, event: AstrMessageEvent):
         """
         ccb，顾名思义，用来ccb
@@ -219,12 +223,29 @@ class ccb(Star):
 
         group_id = str(event.get_group_id())
         send_id = str(event.get_sender_id())
-        user_name = event.get_sender_name()
+        user_name = str(event.get_sender_name())
+        messages = str(event.message_str)
         actor_id = send_id
         faint_min = self.faint_random_min
         faint_max = self.faint_random_max
         now = time.time()
-        f_now = time.time()
+        f_now = time.time
+        target_user_id = self._get_target_user_id(event)
+        #计时器重置伪命令
+        if "ccb clear" in messages and await self._is_admin(event):
+
+            reset_id = target_user_id if target_user_id else send_id
+    
+            current_time = time.time()
+    
+    # 假设你有 self.ban_list 和 self.faint_list 字典存储结束时间戳
+            self.ban_list[reset_id] = current_time      # 或 0，表示立即过期
+            self.faint_list[reset_id] = current_time    # 或 0
+            yield event.plain_result(f"已重置 {reset_id} 的计时器")
+            return
+
+
+
         if self.faint_duration >= 0:
             faint_time = self.faint_duration
         else:
@@ -237,7 +258,6 @@ class ccb(Star):
         else:
             faint_prob_r = random.random()
             yw_prob_r = 1.0
-
 
         # 检查是否在禁用期内
         ban_end = self.ban_list.get(actor_id, 0)
@@ -268,7 +288,7 @@ class ccb(Star):
             yield event.plain_result("你现在已经射不出任何东西了，进入贤者模式")
             return
 
-        target_user_id = self._get_target_user_id(event)
+        
 
         if target_user_id in self.white_list:
             stranger_info = await event.bot.api.call_action(
@@ -288,14 +308,16 @@ class ccb(Star):
                 V = round(random.uniform(0.01,100), 2)
                 a = time_long(timep)
                 b = volume(V)
-                yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
+                
                 if yw_prob_r < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
                     yield event.plain_result(f"💥{user_name}炸膛了，萎")
+                    return
                 if faint_prob_r < self.faint_prob:
                     self.faint_list[actor_id] = f_now + faint_time
                     yield event.plain_result(f"{user_name} 不小心🦌晕了,接下来ta将毫无还手之力")
-            
+                    return
+                yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
             return
 
 
@@ -372,7 +394,22 @@ class ccb(Star):
                                     ccb_by[k]["max"] = False
 
                         item[a4] = ccb_by
+                        # 随机养胃
+                        if yw_prob_r < self.yw_prob:
+                            self.ban_list[actor_id] = now + self.ban_duration
+                            yield event.plain_result(f"💥{nickname}因为些许的意外进入了贤者模式（悲")
+                            return
 
+                        #随机昏厥
+                        if faint_prob_r < self.faint_prob and target_user_id == actor_id:
+                            self.faint_list[target_user_id] = f_now + faint_time
+                            yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
+                            return
+                        if faint_prob_r < self.faint_prob and target_user_id != actor_id:
+                            self.faint_list[target_user_id] = f_now + faint_time
+                            yield event.plain_result(f"{nickname} 被 {user_name} C晕了,接下来ta将毫无还手之力")
+                            return
+                            
                         if crit:
                             chain = [
                                 Comp.Plain(f"{user_name} 和 {nickname} 发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
@@ -398,21 +435,6 @@ class ccb(Star):
                         # 写回数据
                         all_data[group_id] = group_data
                         self.write_data(all_data)
-
-                        # 随机养胃
-                        if yw_prob_r < self.yw_prob:
-                            self.ban_list[actor_id] = now + self.ban_duration
-                            yield event.plain_result(f"💥{nickname}因为些许的意外进入了贤者模式（悲")
-                            
-                    
-                        #随机昏厥
-                        if faint_prob_r < self.faint_prob and target_user_id == actor_id:
-                            self.faint_list[target_user_id] = f_now + faint_time
-                            yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
-                        if faint_prob_r < self.faint_prob and target_user_id != actor_id:
-                            self.faint_list[target_user_id] = f_now + faint_time
-                            yield event.plain_result(f"{nickname} 被 {user_name} C晕了,接下来ta将毫无还手之力")
-                            
                         return
             except Exception as e:
                 logger.error(f"报错: {e}")
@@ -424,6 +446,23 @@ class ccb(Star):
             try:
                 nickname = await self._get_nickname(event, target_user_id, strict_event=True)
 
+                # 随机养胃
+                if yw_prob_r < self.yw_prob_first:
+                    self.ban_list[actor_id] = now + self.ban_duration
+                    yield event.plain_result(f"💥{nickname}因为体虚被处女征服进入了贤者模式（悲")
+                    return
+
+                #随机昏厥
+                if faint_prob_r < self.faint_prob_first and actor_id == target_user_id:
+                    self.faint_list[target_user_id] = f_now + faint_time
+                    yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
+                    return
+                
+                if faint_prob_r < self.faint_prob_first and actor_id != target_user_id:
+                    self.faint_list[target_user_id] = f_now + faint_time
+                    yield event.plain_result(f"{nickname} 被 {user_name}C晕了,接下来ta将毫无还手之力")
+                    return
+                
                 chain = [
                     Comp.Plain(f"{user_name} 和 {nickname}发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
                     Comp.Image.fromURL(pic),
@@ -449,24 +488,6 @@ class ccb(Star):
                         self.append_log(group_id, send_id, target_user_id, duration, V)
                     except Exception as e:
                         logger.warning(f"记录日志失败: {e}")
-
-                # 随机养胃
-                if yw_prob_r < self.yw_prob:
-                    self.ban_list[actor_id] = now + self.ban_duration
-                    yield event.plain_result(f"💥{nickname}因为体虚被处女征服进入了贤者模式（悲")
-                    
-
-                #随机昏厥
-                if faint_prob_r < self.faint_prob and actor_id == target_user_id:
-                    self.faint_list[target_user_id] = f_now + faint_time
-                    yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
-                    
-
-
-                if faint_prob_r < self.faint_prob and actor_id != target_user_id:
-                    self.faint_list[target_user_id] = f_now + faint_time
-                    yield event.plain_result(f"{nickname} 被 {user_name}C晕了,接下来ta将毫无还手之力")
-                    
 
                 return
             except Exception as e:
@@ -823,5 +844,3 @@ class ccb(Star):
         if faint_prob_r < self.faint_prob:
             self.faint_list[actor_id] = f_now + faint_time
             yield event.plain_result(f"{user_name}不小心🦌晕了,接下来ta将毫无还手之力")
-
-        
