@@ -1,8 +1,8 @@
 # C C B PLUS!!! But changed
 
-基于 [Koikokokokoro / ccbPlus](https://github.com/Koikokokokoro/astrbot_plugin_ccb_plus) 的 和QQ群群友发生赛博sex的插件
-[tnno1174  /  dajiao ] {https://github.com/tenno1174/astrbot_plugin_dajiao}的打胶插件融于一炉
-加入了小巧思
+*基于 [Koikokokokoro / ccbPlus](https://github.com/Koikokokokoro/astrbot_plugin_ccb_plus) 的 和QQ群群友发生赛博sex的插件*
+*[tnno1174  /  dajiao ](https://github.com/tenno1174/astrbot_plugin_dajiao) 的打胶插件融于一炉*
+并加入了部分小巧思
 
 # 使用前警告
 由于部分语言过于直白可能会导致封号，该问题正在尝试解决
@@ -15,3 +15,5 @@
 # 增加打胶与help
 可以通过ccbhelp来查看可用命令
 打胶无需多言
+# 准备更新的内容
+暂时还没没想好，不过欢迎你去issues提交一些有趣的想法，我会在力所能及的范围内尽量写出你想要的东西~~虽然写的全是石山~~，码力浅薄写的不好请见谅
