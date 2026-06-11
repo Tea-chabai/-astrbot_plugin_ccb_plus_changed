@@ -311,13 +311,31 @@ class ccb(Star):
                 
                 if yw_prob_r < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
-                    yield event.plain_result(f"💥{user_name}炸膛了，萎")
-                    return
-                if faint_prob_r < self.faint_prob:
+                    chain = [
+                                Comp.Plain(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!"),
+                                #Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                                Comp.Plain("----------------------------------"),
+                                Comp.Plain(f"同时💥{user_name}因为些许的意外炸膛了，进入贤者模式（悲")
+                            ]
+                    yield event.chain_result(chain)
+
+
+                elif faint_prob_r < self.faint_prob:
                     self.faint_list[actor_id] = f_now + faint_time
-                    yield event.plain_result(f"{user_name} 不小心🦌晕了,接下来ta将毫无还手之力")
-                    return
-                yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
+                    chain = [
+                                Comp.Plain(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!"),
+                                #Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                                Comp.Plain("----------------------------------"),
+                                Comp.Plain(f"同时{user_name} 不小心🦌晕了,接下来ta将毫无还手之力")
+                            ]
+                    yield event.chain_result(chain)
+
+                else:
+                    chain = [
+                                Comp.Plain(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!"),
+                                #Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                            ]
+                    yield event.chain_result(chain)
             return
 
 
@@ -397,33 +415,46 @@ class ccb(Star):
                         # 随机养胃
                         if yw_prob_r < self.yw_prob:
                             self.ban_list[actor_id] = now + self.ban_duration
-                            yield event.plain_result(f"💥{nickname}因为些许的意外进入了贤者模式（悲")
-                            return
+                            chain = [
+                                Comp.Plain(f"{user_name} 和 {nickname} 发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
+                                Comp.Image.fromURL(pic),
+                                Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                                Comp.Plain("----------------------------------"),
+                                Comp.Plain(f"同时💥{user_name}因为些许的意外炸膛了，进入贤者模式（悲")
+                            ]
+                            yield event.chain_result(chain)
 
                         #随机昏厥
-                        if faint_prob_r < self.faint_prob and target_user_id == actor_id:
+                        elif faint_prob_r < self.faint_prob and target_user_id == actor_id:
                             self.faint_list[target_user_id] = f_now + faint_time
-                            yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
-                            return
-                        if faint_prob_r < self.faint_prob and target_user_id != actor_id:
-                            self.faint_list[target_user_id] = f_now + faint_time
-                            yield event.plain_result(f"{nickname} 被 {user_name} C晕了,接下来ta将毫无还手之力")
-                            return
+                            chain = [
+                                Comp.Plain(f"{user_name} 和 {nickname} 发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
+                                Comp.Image.fromURL(pic),
+                                Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                                Comp.Plain("----------------------------------"),
+                                Comp.Plain(f"同时{nickname}被自己弄晕了,接下来ta将毫无还手之力")
+                            ]
+                            yield event.chain_result(chain)
                             
-                        if crit:
+
+                        elif faint_prob_r < self.faint_prob and target_user_id != actor_id:
+                            self.faint_list[target_user_id] = f_now + faint_time
                             chain = [
                                 Comp.Plain(f"{user_name} 和 {nickname} 发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
                                 Comp.Image.fromURL(pic),
-                                Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。")
+                                Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                                Comp.Plain("----------------------------------"),
+                                Comp.Plain(f"同时{nickname} 被 {user_name} C晕了,接下来ta将毫无还手之力")
                             ]
+                            yield event.chain_result(chain)
+                            
                         else:
-                            # 发送结果
                             chain = [
                                 Comp.Plain(f"{user_name} 和 {nickname} 发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
                                 Comp.Image.fromURL(pic),
                                 Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。")
-                            ]
-                        yield event.chain_result(chain)
+                                ]
+                            yield event.chain_result(chain)
 
                         # 是否保留完整日志
                         if is_log:
@@ -449,26 +480,48 @@ class ccb(Star):
                 # 随机养胃
                 if yw_prob_r < self.yw_prob_first:
                     self.ban_list[actor_id] = now + self.ban_duration
-                    yield event.plain_result(f"💥{nickname}因为体虚被处女征服进入了贤者模式（悲")
-                    return
-
-                #随机昏厥
-                if faint_prob_r < self.faint_prob_first and actor_id == target_user_id:
-                    self.faint_list[target_user_id] = f_now + faint_time
-                    yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
-                    return
-                
-                if faint_prob_r < self.faint_prob_first and actor_id != target_user_id:
-                    self.faint_list[target_user_id] = f_now + faint_time
-                    yield event.plain_result(f"{nickname} 被 {user_name}C晕了,接下来ta将毫无还手之力")
-                    return
-                
-                chain = [
+                    chain = [
                     Comp.Plain(f"{user_name} 和 {nickname}发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
                     Comp.Image.fromURL(pic),
-                    Comp.Plain("这是ta的初体验~，你把人家的处给破了喵～要负责哦喵～")
-                ]
-                yield event.chain_result(chain)
+                    Comp.Plain("这是ta的初体验~，你把人家的处给破了喵～要负责哦喵～"),
+                    Comp.Plain("----------------------------------"),
+                    Comp.Plain(f"💥同时{user_name}因为体虚被处女征服进入了贤者模式（悲")
+                    ]
+                    yield event.chain_result(chain)
+                    
+
+                #随机昏厥
+                elif faint_prob_r < self.faint_prob_first and actor_id == target_user_id:
+                    self.faint_list[target_user_id] = f_now + faint_time
+                    chain = [
+                    Comp.Plain(f"{user_name} 和 {nickname}发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
+                    Comp.Image.fromURL(pic),
+                    Comp.Plain("这是ta的意外的初体验~，有些许的激烈"),
+                    Comp.Plain("----------------------------------"),
+                    Comp.Plain(f"同时{nickname}不小心把自己弄晕了,接下来ta将毫无还手之力")
+                    ]
+                    yield event.chain_result(chain)
+                    
+                
+                elif faint_prob_r < self.faint_prob_first and actor_id != target_user_id:
+                    self.faint_list[target_user_id] = f_now + faint_time
+                    chain = [
+                    Comp.Plain(f"{user_name} 和 {nickname}发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
+                    Comp.Image.fromURL(pic),
+                    Comp.Plain("这是ta的初体验~，你把人家的处给破了喵～要负责哦喵～"),
+                    Comp.Plain("----------------------------------"),
+                    Comp.Plain(f"同时{nickname}被{user_name}C晕了,接下来ta将毫无还手之力")
+                    ]
+                    yield event.chain_result(chain)
+
+
+                else:
+                    chain = [
+                        Comp.Plain(f"{user_name} 和 {nickname}发生了{duration}min长的ccb行为，{nickname}被注入了{V:.2f}ml的生命因子"),
+                        Comp.Image.fromURL(pic),
+                        Comp.Plain("这是ta的初体验~，你把人家的处给破了喵～要负责哦喵～")
+                    ]
+                    yield event.chain_result(chain)
 
                 # 构造并保存新记录
                 new_record = {
@@ -488,7 +541,6 @@ class ccb(Star):
                         self.append_log(group_id, send_id, target_user_id, duration, V)
                     except Exception as e:
                         logger.warning(f"记录日志失败: {e}")
-
                 return
             except Exception as e:
                 logger.error(f"报错: {e}")
@@ -834,13 +886,32 @@ class ccb(Star):
             remain = int(faint_end - f_now)
             m1, s1 = divmod(remain, 60)
             yield event.plain_result(f"{user_name} 正在昏厥中，剩余 {m1}分{s1}秒，现在的ta毫无还手之力")
-            
             return
         yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
         if yw_prob_r < self.yw_prob:
-            self.ban_list[actor_id] = now + self.ban_duration
-            yield event.plain_result(f"💥{user_name}🦌炸膛了，进入贤者模式")
-        
-        if faint_prob_r < self.faint_prob:
+                    self.ban_list[actor_id] = now + self.ban_duration
+                    chain = [
+                        Comp.Plain(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!"),
+                        #Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                        Comp.Plain("----------------------------------"),
+                        Comp.Plain(f"同时💥{user_name}因为些许的意外炸膛了，进入贤者模式（悲")
+                            ]
+                    yield event.chain_result(chain)
+
+
+        elif faint_prob_r < self.faint_prob:
             self.faint_list[actor_id] = f_now + faint_time
-            yield event.plain_result(f"{user_name}不小心🦌晕了,接下来ta将毫无还手之力")
+            chain = [
+                        Comp.Plain(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!"),
+                        #Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                        Comp.Plain("----------------------------------"),
+                                Comp.Plain(f"同时{user_name} 不小心🦌晕了,接下来ta将毫无还手之力")
+                            ]
+            yield event.chain_result(chain)
+
+        else:
+            chain = [
+                        Comp.Plain(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!"),
+                        #Comp.Plain(f"这是ta的第{item[a2]}次。ta被累积注入了{item[a3]}ml的生命因子。"),
+                            ]
+            yield event.chain_result(chain)
