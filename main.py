@@ -234,6 +234,7 @@ class ccb(Star):
             yw_prob_r = yw_prob_r1
         else:
             faint_prob_r = random.random()
+            yw_prob_r = 1.0
 
 
         # 检查是否在禁用期内
@@ -280,18 +281,18 @@ class ccb(Star):
                 times.clear()
                 yield event.plain_result("你现在已经一滴不剩了，再冲就是雪了（悲")
             else:
-                timep = round(random.uniform(1, 600), 2)
-                V = round(random.uniform(0.001,100), 3)
+                timep = round(random.uniform(0.1, 600), 2)
+                V = round(random.uniform(0.01,100), 2)
                 a = time_long(timep)
                 b = volume(V)
                 user_name = event.get_sender_name()
                 yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
                 if yw_prob_r < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
-                    yield event.plain_result("💥你炸膛了，萎")
+                    yield event.plain_result(f"💥{user_name}炸膛了，萎")
                 if faint_prob_r < self.faint_prob:
                     self.faint_list[actor_id] = f_now + faint_time
-                    yield event.plain_result(f"{user_name} 不小心晕了,接下来ta将毫无还手之力")
+                    yield event.plain_result(f"{user_name} 不小心🦌晕了,接下来ta将毫无还手之力")
             
             return
 
@@ -299,8 +300,8 @@ class ccb(Star):
 
 
         # CCB 逻辑
-        duration = round(random.uniform(1, 60), 2)
-        V = round(random.uniform(0.001, 100), 3)
+        duration = round(random.uniform(0.1, 60), 2)
+        V = round(random.uniform(0.01, 100), 2)
         prob = self.crit_prob
         crit = False
         user_name = event.get_sender_name()
@@ -340,23 +341,23 @@ class ccb(Star):
 
                         # 计算max
                         raw_prev = item.get(a5, None)
-                        prev_max = 0.00
+                        prev_max = 0.0
                         if raw_prev is not None:
                             try:
                                 prev_max = float(raw_prev)
                             except (TypeError, ValueError):
-                                prev_max = 0.00
+                                prev_max = 0.0
                         # 如果不存在合法的 max，使用平均值
-                        if prev_max == 0.00:
+                        if prev_max == 0.0:
                             try:
                                 total_vol = float(item.get(a3, 0))
                                 total_num = int(item.get(a2, 0))
                                 if total_num > 0:
                                     prev_max = round(total_vol / total_num, 2)
                                 else:
-                                    prev_max = 0.00
+                                    prev_max = 0.0
                             except Exception:
-                                prev_max = 0.00
+                                prev_max = 0.0
 
                         if float(V) > prev_max:
                             item[a5] = round(float(V), 2)
@@ -399,7 +400,7 @@ class ccb(Star):
                         # 随机养胃
                         if yw_prob_r < self.yw_prob:
                             self.ban_list[actor_id] = now + self.ban_duration
-                            yield event.plain_result("💥你在这轮后因为用力过猛被迫进入了贤者模式（悲")
+                            yield event.plain_result(f"💥{nickname}因为些许的意外进入了贤者模式（悲")
                             
                     
                         #随机昏厥
@@ -432,9 +433,9 @@ class ccb(Star):
                 new_record = {
                     a1: target_user_id,
                     a2: 1,
-                    a3: round(V, 3),
+                    a3: round(V, 2),
                     a4: {send_id: {"count": 1, "first": True, "max": True}},
-                    a5: round(V, 3)
+                    a5: round(V, 2)
                 }
                 group_data.append(new_record)
                 all_data[group_id] = group_data
@@ -450,7 +451,7 @@ class ccb(Star):
                 # 随机养胃
                 if yw_prob_r < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
-                    yield event.plain_result("💥你在这轮后因为用力过猛被迫进入了贤者模式（悲")
+                    yield event.plain_result(f"💥{nickname}因为体虚被处女征服进入了贤者模式（悲")
                     
 
                 #随机昏厥
@@ -813,10 +814,10 @@ class ccb(Star):
         yield event.plain_result(f"Hello, {user_name}, 你坚持了{timep}s哦，{a}.射出{V}ml,{b}!") 
         if yw_prob_r < self.yw_prob:
             self.ban_list[actor_id] = now + self.ban_duration
-            yield event.plain_result("💥你炸膛了，进入贤者模式")
+            yield event.plain_result(f"💥{user_name}🦌炸膛了，进入贤者模式")
         
         if faint_prob_r < self.faint_prob:
             self.faint_list[actor_id] = f_now + faint_time
-            yield event.plain_result(f"{user_name}不小心鹿晕了,接下来ta将毫无还手之力")
+            yield event.plain_result(f"{user_name}不小心🦌晕了,接下来ta将毫无还手之力")
 
         
