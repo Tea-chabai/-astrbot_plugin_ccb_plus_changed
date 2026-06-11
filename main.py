@@ -271,7 +271,7 @@ class ccb(Star):
                 'get_stranger_info', user_id=target_user_id
             )
             nickname = stranger_info.get("nick", target_user_id)
-            yield event.plain_result(f"{nickname} 的洞洞被掌握CCB的神封印了，不能被艹力（悲")
+            yield event.plain_result(f"{nickname} 的洞洞被掌握CCB的神封印了，不能被C力（悲")
             return
 
         if target_user_id == actor_id and not self.selfdo:
@@ -403,10 +403,10 @@ class ccb(Star):
                             
                     
                         #随机昏厥
-                        if faint_prob_r < self.faint_prob and actor_id == target_user_id:
+                        if faint_prob_r < self.faint_prob and target_user_id == actor_id:
                             self.faint_list[target_user_id] = f_now + faint_time
                             yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
-                        if faint_prob_r < self.faint_prob and actor_id != target_user_id:
+                        if faint_prob_r < self.faint_prob and target_user_id != actor_id:
                             self.faint_list[target_user_id] = f_now + faint_time
                             yield event.plain_result(f"{nickname} 被 {user_name} C晕了,接下来ta将毫无还手之力")
                             
@@ -451,19 +451,19 @@ class ccb(Star):
                 if yw_prob_r < self.yw_prob:
                     self.ban_list[actor_id] = now + self.ban_duration
                     yield event.plain_result("💥你在这轮后因为用力过猛被迫进入了贤者模式（悲")
-                    return
+                    
 
                 #随机昏厥
                 if faint_prob_r < self.faint_prob and actor_id == target_user_id:
                     self.faint_list[target_user_id] = f_now + faint_time
                     yield event.plain_result(f"{nickname}被自己弄晕了,接下来ta将毫无还手之力")
-                    return
+                    
 
 
                 if faint_prob_r < self.faint_prob and actor_id != target_user_id:
                     self.faint_list[target_user_id] = f_now + faint_time
-                    yield event.plain_result(f"{nickname} 被 {user_name}艹晕了,接下来ta将毫无还手之力")
-                    return
+                    yield event.plain_result(f"{nickname} 被 {user_name}C晕了,接下来ta将毫无还手之力")
+                    
 
                 return
             except Exception as e:
@@ -688,7 +688,7 @@ class ccb(Star):
             nick = await self._get_nickname(event, uid, strict_event=True)
             msg += (
                 f"{idx}. {nick} - XNN值：{xnn_val:.2f} \n"
-                # f"(被ccb次数：{num}，容量：{vol:.2f}ml，对他人ccb：{actions})\n"
+                f"(被ccb次数：{num}，容量：{vol:.2f}ml，对他人ccb：{actions})\n"
             )
 
         yield event.plain_result(msg)
@@ -775,7 +775,6 @@ class ccb(Star):
         """
         faint_min = self.faint_random_min
         faint_max = self.faint_random_max
-        faint_time = round(random.uniform(faint_min, faint_max), 2)
         timep = round(random.uniform(1, 666), 2)
         V = round(random.uniform(0.01,114), 2)
         a = time_long(timep)
@@ -792,11 +791,11 @@ class ccb(Star):
             yw_prob_r = yw_prob_r1
         else:
             faint_prob_r = random.random()
+
         if self.faint_duration <= 0:
             faint_time = self.faint_duration
         else:
             faint_time = round(random.uniform(faint_min, faint_max), 2)
-            return
         
         
         
