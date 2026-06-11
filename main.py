@@ -229,7 +229,7 @@ class ccb(Star):
         faint_min = self.faint_random_min
         faint_max = self.faint_random_max
         now = time.time()
-        f_now = time.time
+        f_now = time.time()
         target_user_id = self._get_target_user_id(event)
         #计时器重置伪命令
         if "ccb clear" in messages and await self._is_admin(event):
