@@ -23,25 +23,12 @@
     "default": -1,
     "hint": "被触发昏厥后禁用多长时间。-1为随机时长"
   },
-
-
+  
   "yw_probability": {
     "description": "随机阳痿概率",
     "type": "float",
     "default": 0.1,
     "hint": "每次 CCB 完成后，有多大概率阳痿。"
-  },
-  "white_list": {
-    "description": "不能进行ccb的id列表",
-    "type": "list",
-    "default": [],
-    "hint": "当目标在此列表中时，不能对其ccb。"
-  },
-  "self_ccb": {
-    "description": "是否允许0721或者打胶",
-    "type": "bool",
-    "default": false,
-    "hint": "为true时当ccb指令未指定对象时进行0721。关闭时默认打胶"
   },
   "crit_prob": {
     "description": "暴击概率",
@@ -55,10 +42,34 @@
     "default": 0.2,
     "hint": "ccb或道观时晕倒概率。"
     },
+  "white_list": {
+    "description": "不能进行ccb的id列表",
+    "type": "list",
+    "default": [],
+    "hint": "当目标在此列表中时，不能对其ccb。"
+  },
+  "self_ccb": {
+    "description": "是否允许0721或者打胶",
+    "type": "bool",
+    "default": false,
+    "hint": "为true时当ccb指令未指定对象时进行0721。关闭时默认打胶"
+  },
   "is_log": {
     "description": "完整日志记录",
     "type": "bool",
     "default": "false",
     "hint": "是否独立保留每一条ccb记录，包括双方与注入量。"
+  },
+  "faint_random_min": {
+    "description": "昏厥随机最小时长（秒）",
+    "type": "int",
+    "default": 300,
+    "hint": "昏厥随机时长的最小值。"
+  },
+  "faint_random_max": {
+    "description": "昏厥随机最大时长（秒）",
+    "type": "int",
+    "default": 3600,
+    "hint": "昏厥随机时长的最大值。"
   }
 }
